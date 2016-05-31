@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-@author: Julien Wuthrich & Jos Rozen
+@author: Julien Wuthrich
 """
 import hashlib
-import networkx as nx
 import multiprocessing as mp
 
+import networkx as nx
 import pandas as pd
 
 from ScheduleReader.GtfsScheduleReader import load_gtfs
