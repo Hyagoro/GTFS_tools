@@ -7,11 +7,10 @@ import os
 import pandas as pd
 
 from PreprocessGTFS.PreprocessStopTimes import EstimateStopTimes
-from ScheduleReader.GtfsScheduleReader import load_gtfs
-from Utils.SnippingTools import hashfile, fmt_str, change_nan_value
-from Utils.SnippingTools import list_zip_files
-from Utils.DateTools import to_sod
 from PreprocessGTFS.GenerateShapes import Graph
+from ScheduleReader.GtfsScheduleReader import load_gtfs
+import Utils.SnippingTools as tools
+from Utils.DateTools import to_sod
 
 
 class NormalizeGTFS(object):
@@ -33,7 +32,7 @@ class NormalizeGTFS(object):
                 df[cols] = None
             else:
                 try:
-                    df[cols] = df[cols].map(fmt_str)
+                    df[cols] = df[cols].map(tools.fmt_str)
                 except:
                     pass
 
@@ -49,7 +48,7 @@ class NormalizeGTFS(object):
     def all_shapes(self, trips, gtfs):
 
         graph = Graph(self.gtfs_path)
-        if 'shapes.txt' in list_zip_files(self.path_gtfs):
+        if 'shapes.txt' in tools.list_zip_files(self.path_gtfs):
             if len(trips[trips["shape_id"].isnull()]) > 0:
                 shapes = self.shapes()
 
@@ -72,7 +71,7 @@ class NormalizeGTFS(object):
 
     def is_calendar_dates(self):
 
-        if 'calendar_dates.txt' in list_zip_files(self.gtfs_path):
+        if 'calendar_dates.txt' in tools.list_zip_files(self.gtfs_path):
             calendar_dates = self.calendar_dates()
         else:
             calendar_dates = pd.DataFrame()
@@ -83,7 +82,7 @@ class NormalizeGTFS(object):
 
         return pd.DataFrame(
             [{
-                'gtfs_id': hashfile(self.gtfs_path),
+                'gtfs_id': tools.hashfile(self.gtfs_path),
                 'start_date': self.start_date,
                 'end_date': self.end_date
             }]
@@ -99,7 +98,7 @@ class NormalizeGTFS(object):
             'agency_name', 'agency_url', 'agency_timezone'
         ]
         df = self.GTFS["agency.txt"]
-        df = change_nan_value(df, None)
+        df = tools.change_nan_value(df, None)
 
         return self.format_df(df, _REQUIRED_FIELD_NAMES)
 
@@ -112,8 +111,8 @@ class NormalizeGTFS(object):
             'saturday', 'sunday',
             'start_date', 'end_date'
         ]
-        df = self.GTFS["agency.txt"]
-        df = change_nan_value(df, None)
+        df = self.GTFS["calendar.txt"]
+        df = tools.change_nan_value(df, None)
 
         return self.format_df(df, _REQUIRED_FIELD_NAMES)
 
@@ -123,8 +122,8 @@ class NormalizeGTFS(object):
         _REQUIRED_FIELD_NAMES = _OPTIONAL_FIELD_NAMES + [
             'date', 'service_id', 'exception_type'
         ]
-        df = self.GTFS["agency.txt"]
-        df = change_nan_value(df, None)
+        df = self.GTFS["calendar_dates.txt"]
+        df = tools.change_nan_value(df, None)
 
         return self.format_df(df, _REQUIRED_FIELD_NAMES)
 
@@ -139,7 +138,7 @@ class NormalizeGTFS(object):
             'route_long_name', 'route_type', 'route_url'
         ]
         df = self.GTFS["routes.txt"]
-        df = change_nan_value(df, None)
+        df = tools.change_nan_value(df, None)
 
         df["sha"] = (
             df["route_long_name"].map(str) +
@@ -162,7 +161,7 @@ class NormalizeGTFS(object):
             'stop_lat', 'stop_lon'
         ]
         df = self.GTFS["stops.txt"]
-        df = change_nan_value(df, None)
+        df = tools.change_nan_value(df, None)
 
         return self.format_df(df, _REQUIRED_FIELD_NAMES)
 
@@ -178,7 +177,7 @@ class NormalizeGTFS(object):
         ]
         df = self.GTFS["stop_times.txt"]
         df_trips = self.GTFS["trips.txt"]
-        df = change_nan_value(df, None)
+        df = tools.change_nan_value(df, None)
 
         try:
             df["arrival_time"] = df["arrival_time"].map(to_sod)
@@ -207,7 +206,7 @@ class NormalizeGTFS(object):
         ]
         df = self.GTFS["stop_times.txt"]
         df_calendar = self.GTFS["calendar.txt"]
-        df = change_nan_value(df, None)
+        df = tools.change_nan_value(df, None)
 
         df = pd.merge(
             df,
@@ -228,7 +227,7 @@ class NormalizeGTFS(object):
             'shape_pt_lon', 'shape_pt_sequence',
         ]
         df = self.GTFS["shapes.txt"]
-        df = change_nan_value(df, None)
+        df = tools.change_nan_value(df, None)
 
         return self.format_df(df, _REQUIRED_FIELD_NAMES)
 
